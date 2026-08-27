@@ -119,12 +119,13 @@ jobs:
             sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" >/dev/null 2>&1 || true
             docker system prune -a -f --volumes >/dev/null 2>&1 || true
           fi
-
+          
       - name: Checkout Repo B
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: $SYNCTOKEN
+          token: ${{ env.GITHUB_TOKEN }}
+
 
       # - name: Check and Sync Repository
       #   run: |
