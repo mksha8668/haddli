@@ -20,7 +20,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          WORKFLOW_NAME="Continuous Infrastructure Task"
+          WORKFLOW_NAME="Build Task"
           
           # 1. 加上 -R 参数指定当前仓库
           RUN_IDS=$(gh run list -R "${{ github.repository }}" --workflow "$WORKFLOW_NAME" --status in_progress --json databaseId --jq '.[].databaseId')

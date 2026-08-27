@@ -1,4 +1,4 @@
-name: Continuous Infrastructure Task
+name: Build Task
 
 permissions:
   actions: write 
