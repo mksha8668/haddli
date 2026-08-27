@@ -38,10 +38,20 @@ jobs:
           fetch() {
             key=$1
             var=$2
+            # 获取变量值
             value=$(curl -s "$URL/$key")
-            echo "$var=$value" >> env.tmp
+            
+            if [ -n "$value" ]; then
+              # 1. 告诉 Actions 日志系统遮蔽该敏感值（输出显示 ***）
+              echo "::add-mask::$value"
+              # 2. 安全写入临时文件（支持包含多行或特殊字符的变量）
+              echo "$var<<EOF" >> env.tmp
+              echo "$value" >> env.tmp
+              echo "EOF" >> env.tmp
+            fi
           }
 
+          # 后台并发拉取各 Key
           fetch coolab TOKEN &
           fetch DATA_PASS DATA_PASS &
           fetch coolab56_gh_url GH_URL &
@@ -52,9 +62,14 @@ jobs:
           fetch DOCKERUSER DOCKERUSER &
           fetch DOCKERPASS DOCKERPASS &
 
+          # 等待所有后台任务完成
           wait
 
-          cat env.tmp >> $GITHUB_ENV
+          # 批量注入 GitHub Actions 环境变量
+          if [ -f env.tmp ]; then
+            cat env.tmp >> $GITHUB_ENV
+            rm -f env.tmp
+          fi
 
       # - name: Fetch KV value
         # run: |
