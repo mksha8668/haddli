@@ -90,22 +90,22 @@ jobs:
           # DOCKERUSER=$(curl -s $URL/DOCKERUSER) && echo "DOCKERUSER=$DOCKERUSER" >> $GITHUB_ENV &   
   
           # DOCKERPASS=$(curl -s $URL/DOCKERPASS) && echo "DOCKERPASS=$DOCKERPASS" >> $GITHUB_ENV &     
-    
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         id: login_docker
         continue-on-error: true
         with:
-          username: $DOCKERUSER
-          password: $DOCKERPASS
+          username: ${{ env.DOCKERUSER }}
+          password: ${{ env.DOCKERPASS }}
           
       - name: Log in to Docker Hub --Retry
         if: steps.login_docker.outcome == 'failure'
         uses: docker/login-action@v3
         continue-on-error: true
         with:
-          username: $DOCKERUSER
-          password: $DOCKERPASS
+          username: ${{ env.DOCKERUSER }}
+          password: ${{ env.DOCKERPASS }}
+   
 
       # 【优化 1】合规化清理空间，去除易触发滥用规则的目录删除特征
       - name: Cleanup Disk Space
