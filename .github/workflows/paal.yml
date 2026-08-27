@@ -43,10 +43,10 @@ jobs:
           }
 
           fetch coolab TOKEN &
-          fetch DATAPASS DATAPASS &
-          fetch coolab56ghurl GH_URL &
+          fetch DATA_PASS DATA_PASS &
+          fetch coolab56_gh_url GH_URL &
           fetch epass EPASS &
-          fetch CFTUNNELTOKEN CFTUNNELTOKEN &
+          fetch CF_TUNNEL_TOKEN CF_TUNNEL_TOKEN &
           fetch TAIL TAIL &
           fetch RCLONECONF RCLONECONF &
           fetch DOCKERUSER DOCKERUSER &
