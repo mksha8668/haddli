@@ -1,0 +1,32 @@
+name: 停止任务
+permissions:
+  actions: write # 必须赋予 actions 写入权限，才能执行 cancel 操作
+on:
+  #schedule:
+    #- cron: '25 4 * * *'# 12:25 (UTC 4:25)
+    #- cron: '25 16 * * *'# 0:25 (UTC 16:25)
+  workflow_dispatch: # 支持手动点击触发
+  repository_dispatch:
+    types: [stop_trigger]
+    
+  
+jobs:
+  cancel-active-runs:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 使用内置的 Token
+    steps:
+      - name: 取消正在运行的特定 Workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WORKFLOW_NAME="Continuous Infrastructure Task"
+          
+          # 1. 加上 -R 参数指定当前仓库
+          RUN_IDS=$(gh run list -R "${{ github.repository }}" --workflow "$WORKFLOW_NAME" --status in_progress --json databaseId --jq '.[].databaseId')
+          
+          for ID in $RUN_IDS; do
+            echo "正在停止 Workflow 实例: $ID"
+            # 2. 同样加上 -R 参数
+            gh run cancel -R "${{ github.repository }}" "$ID"
+          done

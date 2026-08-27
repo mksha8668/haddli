@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  alist:
+    image: xhofe/alist:latest
+    container_name: alist
+    ports:
+      - "5244:5244"
+      - "5255:5255"
+      - "5566:5566"
+    volumes:
+      - /home/alist-data:/opt/alist/data
+      - /home/tmp:/opt/alist/data/temp
+      - /:/aaa
+    environment:
+      - PUID=0
+      - PGID=0
+      - UMASK=022
+      - HTTP_PROXY=http://192.168.5.1:7890
+      - HTTPS_PROXY=http://192.168.5.1:7890
+    restart: always
+
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    restart: always
+    command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
+    network_mode: "host"
+    depends_on:
+      - alist
+      
+  lucky:
+    image: gdy666/lucky:v2
+    container_name: lucky
+    labels:
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:16601]"
+    volumes:
+      - /opt/1panel/apps/lucky:/app/conf
+      - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: host
+    restart: always
+    
+    
+     
