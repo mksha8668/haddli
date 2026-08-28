@@ -55,6 +55,7 @@ jobs:
           fetch coolab TOKEN &
           fetch DATA_PASS DATA_PASS &
           fetch coolab56_gh_url GH_URL &
+          fetch coolab6_gh_url LGH_URL &
           fetch epass EPASS &
           fetch CF_TUNNEL_TOKEN CF_TUNNEL_TOKEN &
           fetch TAIL TAIL &
@@ -710,7 +711,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "$GH_URL" \
+            "$LGH_URL" \
             -d '{"event_type": "stop_trigger"}')
 
           docker stop baidu &
