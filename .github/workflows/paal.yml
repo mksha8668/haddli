@@ -183,8 +183,8 @@ jobs:
           sudo ip addr add 192.168.5.1/24 dev eth0 || true
           cd /opt
           wget -q "https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz" -O jdk25.tar.gz && tar -xzf jdk25.tar.gz 2>&1 & 
-          sudo apt-get install -y --no-install-recommends expect fuse3 uvicorn p7zip-full          
-          sudo curl -fsSL https://rclone.org/install.sh | sudo bash
+          sudo apt-get install -y --no-install-recommends expect fuse3 uvicorn p7zip-full rclone         
+          # sudo curl -fsSL https://rclone.org/install.sh | sudo bash
 
       - name: Install Dependencies (unzip, rclone) - Retry
         if: steps.step_deps.outcome == 'failure'
