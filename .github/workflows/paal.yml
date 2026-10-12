@@ -281,7 +281,7 @@ jobs:
           cat /tmp/panel.log
 
       - name: Retart All Job
-        if: steps.step_pull_retry.outcome == 'failure'
+        if: steps.step_pull_retry.outcome == 'failure1'
         run: |
           sudo cp /r3/back/a.sh /opt || true
           HTTP_STATUS=$(curl -s -A "$CURL_UA" -o response.json -w "%{http_code}" -X POST \
