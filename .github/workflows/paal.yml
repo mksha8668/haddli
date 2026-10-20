@@ -25,8 +25,8 @@ on:
 
 jobs:
   run-service:
-    runs-on: ubuntu-latest
-
+    # runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Record Real Start Time
         run: |
