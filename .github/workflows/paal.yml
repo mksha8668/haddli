@@ -761,7 +761,7 @@ jobs:
           cd /opt/1panel/apps/xianyu && docker compose stop &
           docker start cloudflared-tunnel
           
-          sudo tailscale up \
+          ### sudo tailscale up \
             --authkey=${{ secrets.TAIL }} \
             --hostname=github-actions-runner \
             --accept-routes \
