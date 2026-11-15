@@ -569,65 +569,118 @@ jobs:
         id: step_auto_apps
         continue-on-error: true
         run: |
+          # ==================================================
+          # 全局超时控制：115秒，预留5秒收尾
+          # ==================================================
+          set +e
+
+          timeout --signal=TERM --kill-after=5s 115s bash -s <<'SCRIPT'
+
           if [ ! -d "/opt/1panel/apps" ]; then
             exit 0
           fi
 
-          # 定义单应用启动函数（带超时机制）
+          # ==================================================
+          # 单应用启动函数
+          # ==================================================
           start_app() {
             local app_dir="$1"
-            local app_name=$(basename "$app_dir")
-            
+            local app_name
+            app_name=$(basename "$app_dir")
+
             if [ -f "$app_dir/docker-compose.yml" ]; then
               echo "🚀 [启动中] $app_name ..."
-              timeout 15s bash -c "cd '$app_dir' && sudo docker compose up -d > log.txt 2>&1"
-              
+
+              timeout --kill-after=2s 15s \
+                bash -c 'cd "$1" && sudo docker compose up -d > log.txt 2>&1' _ "$app_dir"
+
               if [ $? -eq 0 ]; then
                 echo "✅ [完成] $app_name"
               else
-                echo "⚠️ [超时/失败] $app_name，请检查 log.txt"
+                echo "⚠️ [超时/失败] $app_name"
               fi
             fi
           }
 
           export -f start_app
 
-          # 1. 使用 xargs 实现多任务并行启动（-P 4）
-          find /opt/1panel/apps -maxdepth 1 -mindepth 1 -type d | xargs -I {} -P 4 bash -c 'start_app "$@"' _ {}
+          # ==================================================
+          # 第一阶段：并行启动所有应用
+          # 最多4个任务同时执行
+          # ==================================================
+          echo "🚀 开始并行启动 1Panel 应用..."
+
+          find /opt/1panel/apps \
+            -maxdepth 1 -mindepth 1 -type d -print0 |
+            xargs -0 -r -P 4 -I {} bash -c 'start_app "$@"' _ {}
 
           echo "=================================================="
-          echo "⚠️ 检查失败应用、针对性重试并发送告警..."
+          echo "⚠️ 开始检查失败应用..."
           echo "=================================================="
 
-          # 2. 检查未运行应用并重试告警
+          # ==================================================
+          # 第二阶段：检查失败应用并重试
+          # ==================================================
           for app_dir in /opt/1panel/apps/*; do
-            if [ -d "$app_dir" ] && [ -f "$app_dir/docker-compose.yml" ]; then
-              app_name=$(basename "$app_dir")
-              
-              # 修正1：正确使用 --filter "status=running"
-              running_containers=$(cd "$app_dir" && sudo docker compose ps -q --filter "status=running" 2>/dev/null || true)
-              
-              if [ -z "$running_containers" ]; then
-                echo "🔄 [重试] $app_name ..."
-                
-                # 重试拉起
-                timeout 15s bash -c "cd '$app_dir' && sudo docker compose up -d >> log.txt 2>&1" || true
-                
-                # 再次检查状态
-                retry_check=$(cd "$app_dir" && sudo docker compose ps -q --filter "status=running" 2>/dev/null || true)
-                if [ -z "$retry_check" ]; then
-                  echo "❌ [最终失败] $app_name，正在发送邮件告警..."
-                  # 修正2：使用 $GITHUB_REPOSITORY 规范获取仓库名
-                  sudo bash /opt/1panel/a.sh $(cat /r2/back/ul.txt) "$EPASS" $(cat /r2/back/to.txt) "❌【应用】$app_name 启动失败！请检查 YML 配置。${GITHUB_REPOSITORY:-mksha8721/abb}" || true
-                else
-                  echo "✅ [重试成功] $app_name"
-                fi
+
+            [ -d "$app_dir" ] || continue
+            [ -f "$app_dir/docker-compose.yml" ] || continue
+
+            app_name=$(basename "$app_dir")
+
+            running_containers=$(
+              cd "$app_dir" &&
+              sudo docker compose ps -q --filter "status=running" 2>/dev/null
+            )
+
+            if [ -z "$running_containers" ]; then
+
+              echo "🔄 [重试] $app_name ..."
+
+              timeout --kill-after=2s 10s \
+                bash -c 'cd "$1" && sudo docker compose up -d >> log.txt 2>&1' _ "$app_dir" || true
+
+              # 再次检查
+              retry_check=$(
+                cd "$app_dir" &&
+                sudo docker compose ps -q --filter "status=running" 2>/dev/null
+              )
+
+              if [ -z "$retry_check" ]; then
+
+                echo "❌ [最终失败] $app_name"
+
+                # 发送告警
+                sudo bash /opt/1panel/a.sh \
+                  "$(cat /r2/back/ul.txt)" \
+                  "$EPASS" \
+                  "$(cat /r2/back/to.txt)" \
+                  "❌【应用】$app_name 启动失败！请检查 YML 配置。${GITHUB_REPOSITORY:-mksha8721/abb}" || true
+
+              else
+                echo "✅ [重试成功] $app_name"
               fi
+
             fi
+
           done
 
-          echo "🎉 优化版 1Panel 应用部署流程结束！"
-          
+          echo "🎉 1Panel 应用部署流程结束！"
+
+          SCRIPT
+
+          # ==================================================
+          # 全局超时结果
+          # ==================================================
+          result=$?
+
+          if [ "$result" -eq 124 ] || [ "$result" -eq 137 ]; then
+            echo "⏰ [全局超时] 1Panel 应用部署达到115秒，已强制终止！"
+          else
+            echo "✅ [流程退出] 状态码：$result"
+          fi
+
+          exit "$result"          
           
       # === 批量自动启动（重试步骤，仅在失败时触发） ===
       - name: Auto Discover and Install 1Pan Apps - Retry
