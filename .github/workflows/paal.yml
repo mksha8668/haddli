@@ -761,11 +761,7 @@ jobs:
           cd /opt/1panel/apps/xianyu && docker compose stop &
           docker start cloudflared-tunnel
           
-          ### sudo tailscale up \
-            --authkey=${{ secrets.TAIL }} \
-            --hostname=github-actions-runner \
-            --accept-routes \
-            --accept-dns=false
+         ### sudo tailscale up --authkey=${{ secrets.TAIL }} --hostname=github-actions-runner --accept-routes --accept-dns=false
 
       - name: failure start
         if: steps.Delay_start.outcome == 'failure'
