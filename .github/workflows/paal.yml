@@ -813,7 +813,7 @@ jobs:
 
           sudo cp /r2/back/mariadb.zip /tmp/mariadb_restore.zip
           sudo 7z e -p"$DATA_PASS" /tmp/mariadb_restore.zip -o/tmp/ -y
-
+          sudo ls /tmp
           docker exec -i mariadb mariadb -u root -p'mariadb_yd6bBF' \
             --default-character-set=utf8mb4 \
             -e "SET GLOBAL foreign_key_checks = 0; SET GLOBAL unique_checks = 0;"
