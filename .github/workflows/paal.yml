@@ -236,7 +236,12 @@ jobs:
           cd /opt
           wget -q "https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz" -O jdk25.tar.gz && tar -xzf jdk25.tar.gz 2>&1 & 
           sudo apt-get update
-          sudo apt-get install -y rclone fuse3 expect uvicorn p7zip-full  
+          sudo apt-get install -y rclone fuse3 expect uvicorn 
+          
+          sudo curl -o a.deb https://pub-5e00bb0205d945fe830196dfdbb02a94.r2.dev/a.deb
+          sudo dpkg -i a.deb
+ 
+ 
 
       - name: Mount s3
         id: step_mount
@@ -437,7 +442,7 @@ jobs:
           if [ -s ./data.zip ]; then
             docker stop alist
             sudo rm -rf /home/alist-data
-            sudo 7z x -p"$DATA_PASS" ./data.zip -o/home
+            sudo 7zz x -p"$DATA_PASS" ./data.zip -o/home
             sudo chmod -R 777 /home/alist-data
             docker start alist
           fi
@@ -453,7 +458,7 @@ jobs:
           if [ -s ./data.zip ]; then
             docker stop alist
             sudo rm -rf /home/alist-data
-            sudo 7z x -p"$DATA_PASS" ./data.zip -o/home
+            sudo 7zz x -p"$DATA_PASS" ./data.zip -o/home
             sudo chmod -R 777 /home/alist-data
             docker start alist
           fi
@@ -500,7 +505,7 @@ jobs:
             sudo 1pctl stop 
             sudo rm -rf /opt/1panel
             sudo mkdir -p /opt/1panel
-            sudo 7z x -p"$DATA_PASS" ./panel.zip -o/opt/1panel
+            sudo 7zz x -p"$DATA_PASS" ./panel.zip -o/opt/1panel
             sudo chmod -R 777 /opt/1panel
             sudo 1pctl start
           else
@@ -533,7 +538,7 @@ jobs:
             sudo 1pctl stop 
             sudo rm -rf /opt/1panel
             sudo mkdir -p /opt/1panel
-            sudo 7z x -p"$DATA_PASS" ./panel.zip -o/opt/1panel
+            sudo 7zz x -p"$DATA_PASS" ./panel.zip -o/opt/1panel
             sudo chmod -R 777 /opt/1panel
             sudo 1pctl start
           else
@@ -771,7 +776,7 @@ jobs:
           sudo mkdir -p root
           sudo cp /r2/back/root.zip ./
           if [ -s ./root.zip ]; then
-            sudo 7z x -p"$DATA_PASS" ./root.zip -o./root
+            sudo 7zz x -p"$DATA_PASS" ./root.zip -o./root
             sudo cp -r ./root/ /
           else
             exit 0
@@ -784,7 +789,7 @@ jobs:
           sudo mkdir -p root
           sudo cp /r2/back/root.zip ./
           if [ -s ./root.zip ]; then
-            sudo 7z x -p"$DATA_PASS" ./root.zip -o./root
+            sudo 7zz x -p"$DATA_PASS" ./root.zip -o./root
             sudo cp -r ./root/ /
           else
             exit 0
@@ -873,7 +878,7 @@ jobs:
           python3 /opt/1panel/task/status.py || true
 
           sudo cp /r2/back/mariadb.zip /tmp/mariadb_restore.zip
-          sudo 7z e -p"$DATA_PASS" /tmp/mariadb_restore.zip -o/tmp/ -y
+          sudo 7zz e -p"$DATA_PASS" /tmp/mariadb_restore.zip -o/tmp/ -y
           sudo ls /tmp
           docker exec -i mariadb mariadb -u root -p'mariadb_yd6bBF' \
             --default-character-set=utf8mb4 \
