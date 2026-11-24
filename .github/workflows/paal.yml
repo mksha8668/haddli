@@ -942,7 +942,7 @@ jobs:
           
           sudo bash /opt/1panel/task/all.sh
           
-         # sudo bash /opt/1panel/task/all.sh > /tmp/back_log.txt 2>&1 &
+          # sudo bash /opt/1panel/task/all.sh > /tmp/back_log.txt 2>&1 &
           
           HTTP_STATUS=$(curl -s -A "$CURL_UA" -o response.json -w "%{http_code}" -X POST \
             -H "Accept: application/vnd.github+json" \
