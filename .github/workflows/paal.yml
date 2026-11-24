@@ -935,8 +935,14 @@ jobs:
           
           docker stop siyuan
           docker stop code-server
-          sleep 60
-          sudo bash /opt/1panel/task/all.sh > /tmp/back_log.txt 2>&1 &
+          
+          docker stop baidu
+          
+          sleep 20
+          
+          sudo bash /opt/1panel/task/all.sh
+          
+         # sudo bash /opt/1panel/task/all.sh > /tmp/back_log.txt 2>&1 &
           
           HTTP_STATUS=$(curl -s -A "$CURL_UA" -o response.json -w "%{http_code}" -X POST \
             -H "Accept: application/vnd.github+json" \
